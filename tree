@@ -8,11 +8,6 @@
 // key or NULL if nothing matches.
 tree_node *find_node(tree_node *t, const void *key, int (*comparison_fn)(const void *, const void *))
 {
-    // Suppress compiler warnings
-    //(void)t;
-    //(void)key;
-    //(void)comparison_fn;
-
     if (t == NULL)
     {
         return NULL;
