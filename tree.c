@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "tree.h"
 
 // A useful helper function for contains/find/insert.
