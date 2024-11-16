@@ -1,71 +1,217 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
 
-#define HERE printf("You need to implement this code HERE!")
+#include "tree.h"
 
-typedef struct {
-    void **internal_array; // Use void ** to store pointers to any type
-    unsigned int elements;
-    unsigned int capacity;
-} DynamicArray;
+#define HERE fprintf(stderr, "YOU NEED TO IMPLEMENT THIS!\n");
 
-// This should return an array with 0 entries, capable
-// of holding only 1 entry initially, but it ends up expanding
-// later on.
-DynamicArray *allocate_array() {
-    DynamicArray *dynamicarray = (DynamicArray *)malloc(sizeof(DynamicArray)); 
-    dynamicarray->internal_array = (void **)malloc(sizeof(void *));
-    dynamicarray->elements = 0;
-    dynamicarray->capacity = 1;
-    return dynamicarray;
+// A useful helper function for contains/find/insert.
+// This returns the pointer to the node that matches the
+// key or NULL if nothing matches.
+tree_node *find_node(tree_node *t, const void *key, int (*comparison_fn)(const void *, const void *))
+{
+    // Suppress compiler warnings
+    //(void)t;
+    //(void)key;
+    //(void)comparison_fn;
+
+    if (t == NULL)
+    {
+        return NULL;
+    }
+
+    if (comparison_fn(t->key, key) > 0)
+    {
+        return find_node(t->left, key, comparison_fn);
+    }
+    if (comparison_fn(t->key, key) < 0)
+    {
+        return find_node(t->right, key, comparison_fn);
+    }
+    else
+    {
+        return t;
+    }
 }
 
-// This returns the element at the index. Like Python lists
-// and standard C arrays, the first element is at index 0.
-// Returns NULL if the index is out of range.
-void *get_element(unsigned int index, DynamicArray *data) {
-    if (present(index, data)) {
-        return data->internal_array[index];
-    } else {
+// Allocates a new tree with the specified comparison function.
+tree *new_tree(int (*comparison_fn)(const void *, const void *))
+{
+    (void)comparison_fn;
+    tree *newtree = (tree*)malloc(sizeof(tree));
+    if (newtree == NULL)
+    {
+        return NULL;
+    }
+    newtree->root = NULL; //Make sure to initalize data
+    newtree->comparison_fn = comparison_fn;
+    return newtree;
+}
+
+// Frees the the nodes, but does not free the keys
+// or data (deliberately so).
+void free_node(tree_node *t)
+{
+    (void)t;
+
+    if (t == NULL)
+    {
+        return;
+    }
+
+    free_node(t->left);
+    free_node(t->right);
+    free(t);
+}
+
+// And frees the entire tree and the nodes
+// but again, not the data or keys.
+void free_tree(tree *t)
+{
+    (void)t;
+
+    if (t == NULL)
+    {
+        return;
+    }
+
+    free_node(t->root);
+    free(t);
+}
+
+// Returns true if the key (comparison == 0) is in the tree
+bool contains(tree *t, const void *key)
+{
+    (void)t;
+    (void)key;
+     
+    if (t == NULL)
+    {
+        return false;
+    }
+
+    tree_node *current = t->root;
+    if (find_node(current, key, t->comparison_fn))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    } 
+    
+}
+
+// Returns the data or NULL if the data is not in the tree.
+void *find(tree *t, const void *key)
+{
+    (void)t;
+    (void)key;
+    if (t == NULL)
+    {
+        return NULL;
+    }
+
+    tree_node  *node = find_node(t->root, key, t->comparison_fn);
+    if (node != NULL)
+    {
+        return node->data;
+    }
+    else
+    {
         return NULL;
     }
 }
 
-// Like get, but instead of returning the element it returns
-// a POINTER to the element. 
-// Returns NULL if the index is invalid.
-void **set_element(unsigned int index, DynamicArray *data) {
-    if (present(index, data)) {
-        return &(data->internal_array[index]);
-    } else {
-        return NULL;
+// Inserts the element into the tree
+void insert(tree *t, void *key, void *data)
+{
+    (void)t;
+    (void)key;
+    (void)data;
+
+
+    tree_node *parent = NULL;
+    tree_node *current = t->root;
+    int cmp;
+
+    while (current != NULL)
+    {
+        cmp = t->comparison_fn(current->key, key);
+
+        if (cmp == 0)
+        {
+            current->data = data;
+            return;
+        }
+
+        parent = current;
+        if (cmp > 0)
+        {
+            current = current->left;
+        }
+        else
+        {
+            current = current->right;
+        }
+
+    }
+ 
+    tree_node *node = (tree_node*)malloc(sizeof(tree_node));
+    node->key = key;
+    node->data = data;
+    node->left = NULL;
+    node->right = NULL;
+
+    if (parent == NULL)
+    {
+        t->root = node;
+    }
+    else if (cmp > 0)
+    {
+        parent->left = node;
+    }
+    else
+    {
+        parent->right = node;
     }
 }
 
-// This should free all the memory in the dynamic array.
-void deallocate_array(DynamicArray *data) {
-    for (unsigned int i = 0; i < data->elements; i++) {
-        free(data->internal_array[i]); // Assuming each element is dynamically allocated
+// This visits every node in an in-order traversal,
+// calling f on key, data, context.  Context is
+// so that f has an ability to maintain its own state
+// between calls.  This is a useful helper function for implemneting
+// traverse
+void traverse_node(tree_node *t, void (*f)(void *, void *, void *), void *context)
+{
+    (void)t;
+    (void)f;
+    (void)context;
+    tree_node *current = t;
+
+    if (current == NULL)
+    {
+        return;
     }
-    free(data->internal_array);
-    free(data);
+
+    traverse_node(current->left, f, context);
+    f(current->key, current->data, context);
+    traverse_node(current->right, f, context);
+
+    return;
+
 }
 
-// This should add on an element at the end, resizing the
-// array if necessary.
-void append(void *element, DynamicArray *data) {
-    if (data->elements == data->capacity) {
-        data->capacity *= 2;
-        data->internal_array = (void **)realloc(data->internal_array, data->capacity * sizeof(void *));
-    }
-    data->internal_array[data->elements] = element; // Store the pointer
-    data->elements++;
+void traverse(tree *t, void (*f)(void *, void *, void *), void *context)
+{
+    (void)t;
+    (void)f;
+    (void)context;
+    
+    traverse_node(t->root, f, context);
+
+    return;
 }
 
-// A boolean test on "is the index in the range of the array".
-bool present(unsigned int index, DynamicArray *data) {
-    return index < data->elements;
-}
+
+ 
