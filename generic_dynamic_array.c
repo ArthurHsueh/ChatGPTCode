@@ -3,8 +3,6 @@
 
 #include "tree.h"
 
-#define HERE fprintf(stderr, "YOU NEED TO IMPLEMENT THIS!\n");
-
 // A useful helper function for contains/find/insert.
 // This returns the pointer to the node that matches the
 // key or NULL if nothing matches.
