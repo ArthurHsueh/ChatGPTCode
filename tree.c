@@ -44,8 +44,6 @@ tree *new_tree(int (*comparison_fn)(const void *, const void *))
 // or data (deliberately so).
 void free_node(tree_node *t)
 {
-    (void)t;
-
     if (t == NULL)
     {
         return;
@@ -60,8 +58,6 @@ void free_node(tree_node *t)
 // but again, not the data or keys.
 void free_tree(tree *t)
 {
-    (void)t;
-
     if (t == NULL)
     {
         return;
@@ -73,10 +69,7 @@ void free_tree(tree *t)
 
 // Returns true if the key (comparison == 0) is in the tree
 bool contains(tree *t, const void *key)
-{
-    (void)t;
-    (void)key;
-     
+{   
     if (t == NULL)
     {
         return false;
@@ -97,8 +90,6 @@ bool contains(tree *t, const void *key)
 // Returns the data or NULL if the data is not in the tree.
 void *find(tree *t, const void *key)
 {
-    (void)t;
-    (void)key;
     if (t == NULL)
     {
         return NULL;
@@ -118,11 +109,6 @@ void *find(tree *t, const void *key)
 // Inserts the element into the tree
 void insert(tree *t, void *key, void *data)
 {
-    (void)t;
-    (void)key;
-    (void)data;
-
-
     tree_node *parent = NULL;
     tree_node *current = t->root;
     int cmp;
@@ -176,9 +162,6 @@ void insert(tree *t, void *key, void *data)
 // traverse
 void traverse_node(tree_node *t, void (*f)(void *, void *, void *), void *context)
 {
-    (void)t;
-    (void)f;
-    (void)context;
     tree_node *current = t;
 
     if (current == NULL)
@@ -196,12 +179,7 @@ void traverse_node(tree_node *t, void (*f)(void *, void *, void *), void *contex
 
 void traverse(tree *t, void (*f)(void *, void *, void *), void *context)
 {
-    (void)t;
-    (void)f;
-    (void)context;
-    
     traverse_node(t->root, f, context);
-
     return;
 }
 
